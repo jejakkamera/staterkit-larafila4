@@ -22,6 +22,14 @@ use Illuminate\Support\Facades\Hash;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Columns\ViewColumn;
+use Illuminate\Support\Facades\Auth;
+use Filament\Actions\ActionGroup;
+use Filament\Support\Icons\Heroicon;
+use Filament\Forms\Components\TextInput as FormTextInput;
+use Filament\Forms\Components\Select as FormSelect;
+use Filament\Support\Enums\Width;
+use Illuminate\Support\Facades\Session;
 
 class UserList extends Component implements HasTable, HasForms, HasActions
 {
@@ -62,6 +70,58 @@ class UserList extends Component implements HasTable, HasForms, HasActions
             ->striped()
             ->paginated([10, 25, 50])
             ->recordUrl(null)
+            ->actions([
+                ActionGroup::make([
+                    Action::make('loginAs')
+                        ->label('Login as')
+                        ->icon(Heroicon::ArrowRightStartOnRectangle)
+                        ->color('info')
+                        ->action(fn (User $record) => $this->loginAs($record->id)),
+                    Action::make('edit')
+                        ->label('Edit')
+                        ->icon(Heroicon::PencilSquare)
+                        ->color('gray')
+                        ->form([
+                            FormTextInput::make('name')
+                                ->required()
+                                ->maxLength(255),
+                            FormTextInput::make('email')
+                                ->email()
+                                ->required()
+                                ->maxLength(255),
+                            FormSelect::make('role')
+                                ->options([
+                                    'user' => '👤 User',
+                                    'admin' => '🛡️ Admin',
+                                ])
+                                ->required(),
+                        ])
+                        ->fillForm(fn (User $record): array => [
+                            'name' => $record->name,
+                            'email' => $record->email,
+                            'role' => $record->role,
+                        ])
+                        ->action(function (User $record, array $data): void {
+                            $record->update([
+                                'name' => $data['name'],
+                                'email' => $data['email'],
+                                'role' => $data['role'],
+                            ]);
+                        })
+                        ->modalHeading('Edit User')
+                        ->modalWidth(Width::Small)
+                        ->modalIcon(Heroicon::PencilSquare),
+                    Action::make('delete')
+                        ->label('Delete')
+                        ->icon(Heroicon::Trash)
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->action(fn (User $record) => $this->deleteUser($record->id)),
+                ])
+                    ->icon(Heroicon::EllipsisVertical)
+                    ->size('sm')
+                    ->button(),
+            ])
             ->filters([
                 SelectFilter::make('role')
                     ->options([
@@ -104,37 +164,6 @@ class UserList extends Component implements HasTable, HasForms, HasActions
                         return $indicators;
                     }),
             ])
-            ->actions([
-                Action::make('edit')
-                    ->icon('heroicon-m-pencil-square')
-                    ->fillForm(function (User $record): array {
-                        return [
-                            'name' => $record->name,
-                            'email' => $record->email,
-                            'role' => $record->role,
-                        ];
-                    })
-                    ->form($this->getFormSchema())
-                    ->action(function (User $record, array $data) {
-                        $record->update([
-                            'name' => $data['name'],
-                            'email' => $data['email'],
-                            'role' => $data['role'],
-                        ]);
-                        if (filled($data['password'])) {
-                            $record->update(['password' => Hash::make($data['password'])]);
-                        }
-                    })
-                    ->modalHeading('Edit User'),
-                Action::make('delete')
-                    ->icon('heroicon-m-trash')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->modalHeading('Delete User')
-                    ->modalDescription('Are you sure you want to delete this user? This action cannot be undone.')
-                    ->modalSubmitActionLabel('Delete')
-                    ->action(fn (User $record) => $record->delete()),
-            ])
             ->headerActions([
                 CreateAction::make()
                     ->label('Add User')
@@ -150,6 +179,37 @@ class UserList extends Component implements HasTable, HasForms, HasActions
                     })
                     ->modalHeading('Create New User'),
             ]);
+    }
+
+    public function deleteUser($userId): void
+    {
+        User::find($userId)?->delete();
+    }
+
+    public function loginAs($userId): void
+    {
+        $user = User::find($userId);
+        if ($user) {
+            // Store the original admin user ID in session
+            Session::put('original_admin_id', Auth::id());
+            Session::put('impersonating', true);
+            
+            Auth::login($user);
+            $this->redirect(route('dashboard'));
+        }
+    }
+
+    public function switchBackToAdmin(): void
+    {
+        $originalAdminId = Session::get('original_admin_id');
+        if ($originalAdminId) {
+            $admin = User::find($originalAdminId);
+            if ($admin) {
+                Auth::login($admin);
+                Session::forget(['original_admin_id', 'impersonating']);
+                $this->redirect(route('dashboard'));
+            }
+        }
     }
 
     protected function getFormSchema(): array

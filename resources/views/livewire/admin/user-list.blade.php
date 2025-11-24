@@ -1,5 +1,14 @@
 
     <div class="max-w-7xl mx-auto">
+        <!-- Breadcrumb Navigation -->
+        <div class="mb-6 flex items-center space-x-2 text-sm">
+            <a href="/" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">Home</a>
+            <span class="text-zinc-400 dark:text-zinc-600">/</span>
+            <a href="/admin" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">Admin</a>
+            <span class="text-zinc-400 dark:text-zinc-600">/</span>
+            <span class="text-zinc-900 dark:text-white font-medium">Users</span>
+        </div>
+
         <!-- Header Section -->
         <div class="mb-8">
             <p class="text-lg text-zinc-600 dark:text-zinc-400">Manage all system users and their roles</p>
