@@ -1,6 +1,6 @@
-# Laravel Livewire Starter Kit - Database Backup Management System
+# Laravel Livewire Starter Kit - Admin Maintenance Suite
 
-Aplikasi web modern yang dibangun dengan Laravel 12 dan Livewire 3 untuk manajemen backup database dengan dukungan AI Assistant yang didukung OpenAI.
+Aplikasi web modern berbasis Laravel 12 + Livewire 3 untuk memantau aktivitas pengguna, mengelola backup database, dan membaca log sistem lengkap dengan AI Assistant berbasis OpenAI.
 
 ## 📋 Daftar Isi
 - [Tentang Aplikasi](#tentang-aplikasi)
@@ -19,17 +19,22 @@ Aplikasi web modern yang dibangun dengan Laravel 12 dan Livewire 3 untuk manajem
 
 Aplikasi ini adalah sistem manajemen yang komprehensif dengan fokus pada:
 
-1. **Backup Database Otomatis** - Buat, kelola, dan pantau backup database dengan mudah
-2. **AI Assistant** - Chat dengan OpenAI untuk mendapatkan rekomendasi backup management
-3. **Dashboard Admin** - Interface admin yang intuitif untuk mengelola sistem
-4. **User Management** - Sistem autentikasi dan role management
-5. **Real-time Monitoring** - Pantau progress backup secara real-time
+1. **Dashboard Pengguna Aktif** – menampilkan total user aktif 15 menit terakhir.
+2. **Backup Database Otomatis** – buat, kelola, dan pantau backup database dengan mudah.
+3. **System Log Monitoring** – filter, paginate, download, reset, atau hapus log Laravel langsung dari UI admin.
+4. **AI Assistant** – chat dengan OpenAI untuk rekomendasi backup management.
+5. **User & Admin Tools** – autentikasi, role admin-only, dan navigasi sidebar terstruktur.
 
 ---
 
 ## ✨ Fitur Utama
 
-### 1. Database Backup Management
+### 1. Active User Dashboard
+- 📊 Hitung otomatis pengguna aktif (15 menit terakhir) berbasis tabel `sessions`
+- 🔄 Timestamp pembaruan + relative time indicator
+- 🧼 Tampilan dashboard sederhana tanpa widget demo
+
+### 2. Database Backup Management
 - 📦 Buat backup database on-demand
 - 📋 Tampilkan daftar semua backup
 - ⬇️ Download backup files
@@ -37,21 +42,28 @@ Aplikasi ini adalah sistem manajemen yang komprehensif dengan fokus pada:
 - 📊 Pantau ukuran dan tanggal backup
 - ⏱️ Progress tracking real-time
 
-### 2. AI Assistant (Chat dengan OpenAI)
+### 3. AI Assistant (Chat dengan OpenAI)
 - 💬 Chat interaktif untuk mengelola backup
 - 🤖 Intent detection (list, create, delete, check)
 - 📚 Context-aware responses dengan MCP (Model Context Protocol)
 - 🎯 Natural language commands
 - 💾 Chat history persistence
 
-### 3. Dashboard & UI
+### 4. System Log Monitoring
+- 🗂️ Pilih file log Laravel (otomatis mendeteksi semua `.log` di `storage/logs`)
+- 🔍 Filter teks + filter tanggal (start/end)
+- 📑 Pagination berbasis Livewire dengan indikator “more results”
+- ⬇️ Download log, 🔄 reset konten, atau 🗑️ hapus file
+- 👁️ Indikator level warna (info/warning/error) + channel breakdown
+
+### 5. Dashboard & UI
 - 🎨 Dark mode support
 - 📱 Responsive design
 - ⚡ Real-time updates dengan Livewire
 - 🧩 Component-based architecture
-- 🎯 Breadcrumb navigation
+- 🗂️ Sidebar admin dengan group “Maintenance” yang bisa collapse
 
-### 4. User & Security
+### 6. User & Security
 - 👤 User authentication (Fortify)
 - 🔐 Role-based access control
 - 🔒 Two-factor authentication support
@@ -279,8 +291,13 @@ my-app/
 │   ├── Http/                 # Controllers & Middleware
 │   ├── Jobs/                 # Queue jobs
 │   ├── Livewire/             # Livewire components
+│   │   ├── AdminDashboard.php       # Dashboard widget (active users)
+│   │   ├── Chat.php                 # Global chat component
 │   │   └── Admin/
-│   │       └── DatabaseBackup.php   # Main backup component
+│   │       ├── DatabaseBackup.php   # Backup management UI
+│   │       ├── LogViewer.php        # System log monitoring UI
+│   │       ├── UserList.php         # User management table
+│   │       └── WebsiteSettings.php  # Site configuration form
 │   ├── Models/               # Eloquent models
 │   ├── Mcp/                  # Model Context Protocol
 │   │   ├── Servers/
@@ -296,7 +313,7 @@ my-app/
 ├── resources/
 │   ├── css/                  # CSS files
 │   ├── js/                   # JavaScript files
-│   └── views/                # Blade templates
+│   └── views/                # Blade templates (dashboard, sidebar, admin views)
 ├── routes/                   # Route definitions
 ├── storage/                  # App storage (logs, cache, backups)
 ├── tests/                    # Test files
@@ -319,6 +336,11 @@ my-app/
 2. Register akun baru atau login dengan credentials default
 3. Masuk ke dashboard admin
 
+### Monitoring Pengguna Aktif
+1. Buka **Dashboard** (menu Platform → Dashboard).
+2. Card **Active Users** menampilkan jumlah user yang aktif dalam 15 menit terakhir.
+3. Timestamp di sisi kanan akan menunjukkan kapan data terakhir diperbarui.
+
 ### Membuat Backup Database
 1. Navigasi ke: **Admin → Database Backup**
 2. Klik tombol **"Create Backup Now"**
@@ -338,6 +360,17 @@ my-app/
 1. Di tabel "Available Backups"
 2. Klik tombol **"Download"** untuk mengunduh file backup
 3. Klik tombol **"Delete"** untuk menghapus backup
+
+### Manajemen Log Sistem
+1. Buka **Admin → Maintenance → System Logs** (group sidebar bisa di-collapse/expand).
+2. Pilih file log yang ingin dibaca (otomatis men-scan `storage/logs`).
+3. Gunakan filter **Search**, **Start date**, **End date**, serta **Lines to show** untuk mempersempit hasil.
+4. Navigasi antar halaman memakai tombol **Previous/Next**; indikator footer memberi tahu jika masih ada log berikutnya.
+5. Tombol aksi:
+   - **Refresh** → reload isi log.
+   - **Download log** → unduh file log aktif.
+   - **Reset log** → kosongkan isi file (tetap mempertahankan file-nya).
+   - **Delete log** → hapus file log beserta isinya (akan hilang dari daftar sampai Laravel menulis ulang file baru).
 
 ### Queue Management
 Untuk melihat jobs yang antri:

@@ -31,16 +31,18 @@
             <flux:navlist id="sidebarNav" variant="outline">
                 <flux:navlist.group :heading="__('Platform')" class="grid" data-group="platform">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate data-search="dashboard home">{{ __('Dashboard') }}</flux:navlist.item>
-                    <flux:navlist.item icon="view-columns" :href="route('kanban.demo')" :current="request()->routeIs('kanban.demo')" wire:navigate data-search="kanban flux">{{ __('Kanban Demo') }}</flux:navlist.item>
-                    <flux:navlist.item icon="square-3-stack-3d" :href="route('accordion.demo')" :current="request()->routeIs('accordion.demo')" wire:navigate data-search="accordion flux">{{ __('Accordion Demo') }}</flux:navlist.item>
                 </flux:navlist.group>
 
                 @if (auth()->user()->isAdmin())
-                    @include('components.layouts.app.menus.admin')
+                        @include('components.layouts.app.menus.admin', ['section' => 'nav'])
                 @else
                     @include('components.layouts.app.menus.user')
                 @endif
             </flux:navlist>
+
+                @if (auth()->user()->isAdmin())
+                    @include('components.layouts.app.menus.admin', ['section' => 'maintenance'])
+                @endif
 
             <flux:spacer />
 
@@ -195,6 +197,7 @@
                 searchInput.addEventListener('input', function() {
                     const query = this.value.toLowerCase().trim();
                     const groups = sidebarNav.querySelectorAll('[data-group]');
+                    const maintenanceGroups = document.querySelectorAll('[data-sidebar-group]');
                     
                     groups.forEach(group => {
                         const items = group.querySelectorAll('[data-search]');
@@ -213,6 +216,25 @@
                         });
                         
                         // Hide group heading if no items match
+                        group.style.display = visibleCount > 0 ? '' : 'none';
+                    });
+
+                    maintenanceGroups.forEach(group => {
+                        const items = group.querySelectorAll('[data-search]');
+                        let visibleCount = 0;
+
+                        items.forEach(item => {
+                            const searchText = item.getAttribute('data-search').toLowerCase();
+                            const matches = searchText.includes(query);
+
+                            if (query === '' || matches) {
+                                item.style.display = '';
+                                visibleCount++;
+                            } else {
+                                item.style.display = 'none';
+                            }
+                        });
+
                         group.style.display = visibleCount > 0 ? '' : 'none';
                     });
                     

@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
@@ -8,7 +10,20 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::view('dashboard', 'dashboard')
+Route::get('dashboard', function () {
+    $activityWindow = Carbon::now()->subMinutes(15)->timestamp;
+
+    $activeCount = DB::table('sessions')
+        ->whereNotNull('user_id')
+        ->where('last_activity', '>=', $activityWindow)
+        ->distinct('user_id')
+        ->count('user_id');
+
+    return view('dashboard', [
+        'activeCount' => $activeCount,
+        'lastUpdated' => Carbon::now(),
+    ]);
+})
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
@@ -18,12 +33,6 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/profile', 'settings.profile')->name('profile.edit');
     Volt::route('settings/password', 'settings.password')->name('user-password.edit');
     Volt::route('settings/appearance', 'settings.appearance')->name('appearance.edit');
-
-    Route::view('kanban-demo', 'kanban-demo')
-        ->name('kanban.demo');
-
-    Route::view('accordion-demo', 'accordion-demo')
-        ->name('accordion.demo');
 
     Volt::route('settings/two-factor', 'settings.two-factor')
         ->middleware(
@@ -60,4 +69,5 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/users', \App\Livewire\Admin\UserList::class)->name('admin.users');
     Route::get('/admin/settings', \App\Livewire\Admin\WebsiteSettings::class)->name('admin.settings');
     Route::get('/admin/backup', \App\Livewire\Admin\DatabaseBackup::class)->name('admin.backup');
+    Route::get('/admin/logs', \App\Livewire\Admin\LogViewer::class)->name('admin.logs');
 });

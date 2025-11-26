@@ -80,16 +80,7 @@
             </span>
         </button>
 
-        <button 
-            @click="openMcpModal()"
-            class="px-4 py-3 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold rounded-lg border-2 border-blue-300 dark:border-blue-700 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all flex items-center gap-2"
-            title="Open AI Assistant for backup management"
-        >
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zm-11-1a1 1 0 11-2 0 1 1 0 012 0z" clip-rule="evenodd" />
-            </svg>
-            <span>Ask AI</span>
-        </button>
+        
     </div>
 
     <!-- Info Box -->
