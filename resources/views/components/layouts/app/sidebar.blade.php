@@ -31,6 +31,8 @@
             <flux:navlist id="sidebarNav" variant="outline">
                 <flux:navlist.group :heading="__('Platform')" class="grid" data-group="platform">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate data-search="dashboard home">{{ __('Dashboard') }}</flux:navlist.item>
+                    <flux:navlist.item icon="view-columns" :href="route('kanban.demo')" :current="request()->routeIs('kanban.demo')" wire:navigate data-search="kanban flux">{{ __('Kanban Demo') }}</flux:navlist.item>
+                    <flux:navlist.item icon="square-3-stack-3d" :href="route('accordion.demo')" :current="request()->routeIs('accordion.demo')" wire:navigate data-search="accordion flux">{{ __('Accordion Demo') }}</flux:navlist.item>
                 </flux:navlist.group>
 
                 @if (auth()->user()->isAdmin())

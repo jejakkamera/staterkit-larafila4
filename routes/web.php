@@ -19,6 +19,12 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/password', 'settings.password')->name('user-password.edit');
     Volt::route('settings/appearance', 'settings.appearance')->name('appearance.edit');
 
+    Route::view('kanban-demo', 'kanban-demo')
+        ->name('kanban.demo');
+
+    Route::view('accordion-demo', 'accordion-demo')
+        ->name('accordion.demo');
+
     Volt::route('settings/two-factor', 'settings.two-factor')
         ->middleware(
             when(
